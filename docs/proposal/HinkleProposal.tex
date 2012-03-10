@@ -1,0 +1,117 @@
+\documentstyle{article}
+
+\title{592 Project Proposal \\ Efficient Graph Based Segmentation}
+\author{Lauren Hinkle}
+
+\begin{document}
+\maketitle
+
+\section{Efficient Graph Based Segmentation}
+Efficient Graph Based Segmentation was published in 2004 in the International
+Journal of Computer Vision.  It approaches the problem of image segmentation
+by approaching an image as a graph, and attempts to optimally segment the graph
+by using a pairwise region comparison predicate, defined in this paper.
+
+Felzenszwalb and Huttenlocher consider two forms of graphs that an image can be
+transformed into, one based only on pixel location and one that takes the color
+of a pixel into account.  In the first approach, each pixel is considered a
+node, and an edge is added between a pixel and its eight neighbors.  In the
+second approach, the pixels are projected into a feature space, where each
+pixel's features are defined to be its $(x,y)$ location in the image and its $RGB$
+values.  Each pixel is then connected to its $n$ nearest neighbors in the feature
+space.  This second approach allows an image to have non-contiguous segments.  In
+both graph types, the edges between each node are weighted to reflect the
+dissimilarity of the pixels being connected.
+
+Two metrics are introduced to aid segmentation of these graphs, the \emph{internal
+difference} ($Int(C)$) and \emph{difference between} ($Diff(C_1,C_2)$).  The
+$Int(C)$ of a component $C$ is the largest weight in the minimum spanning tree
+of the component.  The $Diff(C_1,C_2)$ between two components $C_1$ and $C_2$ is the
+minimum weight of an edge connecting the two components, or $\infty$ if they are
+not connected.  Evidence of a boundary is shown by considering the relative
+difference between $Diff(C_1,C_2)$ and $max(Int(C_1),Int(C_2))$, where a large
+difference is indicative of an edge.
+
+These two metrics are used to define the concepts of segmentations that are
+\emph{too fine} or \emph{too coarse}.  A segmentation that is too fine is one
+in which there is no evidence for a boundary between any two segments, and a
+segmentation that is too coarse is one that can be refined to a segmentation
+that is not too fine.  These definitions create the existence of an optimally
+segmented image which is neither too coarse nor too fine.  The segmentation
+algorithm in this paper uses this definition as well as the pairwise comparison
+technique to optimally segment an image, based on the author's definition of
+optimal ~\cite{felzenszwalb2004}.
+
+The algorithm developed in this paper is tested using the COIL database
+~\cite{nene1996columbia} and a datast of synthetic images, and example resulting
+segmentations are shown in the paper.  The algorithm is not tested against any
+other algorithm, and the resulting segmentations are not compared against
+human-segmented images.
+
+
+\section{Research Hypothesis}
+This research will seek to show that adaptively adjusting the segmentation criteria
+based on the degree of variability in neighboring regions of the image improves
+the segmentation over other graph-based segmentation techniques, where improving
+the segmentation means that it is closer in quality to a hand-segmented image.
+
+This is similar to the hypothesis put forth by the paper, with the addition of a
+comparison test and numerical evaluation.  The lack of empirical tests left the
+article's hypothesis untested.  I propose introducing a third data set,
+the Berkeley Segmentation Dataset and Benchmark, which contains 500 images that
+have each been hand-segmented by several people ~\cite{MartinFTM01}.  The images
+from this dataset can be used to evaluate the segmentations produced by this
+algorithm and will allow for comparison with other segmentation algorithms that
+also use this data set.
+
+\section{Research Plan}
+In order to test this hypothesis it will be necessary to replicate not only the
+algorithm proposed in this paper, but also segmentation algorithms that do not
+use variability in neighboring regions as segmentation criteria.  I intend to
+implement a similar algorithm that instead uses a constant threshold for inter-
+region and intra-region variability for segmentation.  Additionally, I hope to
+locate the results of other algorithms to compare.
+
+Although image segmentation is a widely studied problem, it is not uncommon for
+new algorithms to be put forth without an empirical evaluation.  Even when an
+empirical evaluation is performed there is no standard technique used.  There
+have been many evaluation techniques proposed, and I will select from these to
+evaluate the algortithm proposed by \cite{felzenszwalb2004}.  For example,
+several metrics for segmentation evaluation have been proposed that measure the
+``goodness'' of a segmentation based on the intra-region uniformity, the
+inter-region contrast, the number of mis-segmented pixels, the location of the
+mis-segmented pixels, and the shape and number of the segmented regions
+\cite{zhang1996survey}.  The first two techniques evaluate a segmentation without the
+use of ground truth data while the others require it.
+
+Segmentation is a hard problem even for humans.  A quick glance at the segmented
+images from the Berkeley dataset reveals that different people segment the same
+image in differently.  Although the overall segmentation is similar, the detail
+varies greatly.  As a result, it is necessary to evaluate the variability in
+human-segmented images in order to determine whether the computer segmented
+image is on par.
+\\
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{2}{|c|}{Timeline:}\\
+\hline
+Date & Goal\\
+\hline
+Feb. 10 & Obtain necessary datasets \\
+Feb. 17 & Implement pairwise region comparison predicate \\
+Feb. 24 & Implement both types of graphs \\
+March 2 & Implement segmentation algorithms for comparison \\
+March 9 & Implement segmentation evaluation techniques \\
+March 23 & Finish testing on all data sets, consider extentions \\
+April 11 & Finish presentation and paper\\
+\hline
+\end{tabular}
+\end{center}
+
+% XXX References
+\bibliographystyle{plain}
+\bibliography{sources}
+
+
+\end{document}
