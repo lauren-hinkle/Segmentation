@@ -115,10 +115,12 @@ class Graph2D
             Edge eq = sorted.get(q);
             Component2D c1 = eq.node1.component;
             Component2D c2 = eq.node2.component;
-            if(c1.disjointSet(c2) && c1.pairwiseComparison(c2)){
-                //System.out.print("..merging..");
-                mergeComponents(c1, c2, segments);
-                //System.out.print("..merged."+q+"..");
+            if(c1.disjointSet(c2)){
+                if(c1.pairwiseComparison(c2)){
+                    //System.out.print("..merging..");
+                    mergeComponents(c1, c2, segments);
+                    //System.out.print("..merged."+q+"..");
+                }
             }
         }
 
@@ -141,55 +143,96 @@ class Graph2D
                 n.setComponent(c);
                 finalNodes.add(n);
                 c.addNode(n);
-                //intersection.put(c,c);
                 intersection.add(c);
             }
         }
 
+        System.out.println("Merging two segmentations");
         for(int x=0; x<width; x++){
+            System.out.print(x+"..");
             for(int y=0; y<height; y++){
 
                 int i = y*width + x;
+                Node2D n1 = finalNodes.get(i);
                 if(x < width-1){
                     int j = i + 1;
-                    mergeIfApprop(s1, s2, i, j, intersection, finalNodes);
+                    Node2D n2 = finalNodes.get(j);
+                    if(appropToMerge(n1, n2, s1, s2)){
+                        ArrayList<Node2D> nodes = (ArrayList<Node2D>) n2.component.nodes.clone();
+                        for(Node2D n: nodes){
+                            n.component = n1.component;
+                            n1.component.nodes.add(n);
+                        }
+                        intersection.remove(n2.component);
+                        //mergeComponents(n1.component, n2.component, intersection);
+                    }
                 }
                 if(x > 0 && y < height-1){
                     int j = i + width - 1;
-                    mergeIfApprop(s1, s2, i, j, intersection, finalNodes);
+                    Node2D n2 = finalNodes.get(j);
+                    if(appropToMerge(n1, n2, s1, s2)){
+                        ArrayList<Node2D> nodes = (ArrayList<Node2D>) n2.component.nodes.clone();
+                        for(Node2D n: nodes){
+                            n.component = n1.component;
+                            n1.component.nodes.add(n);
+                        }
+                        intersection.remove(n2.component);
+                        //mergeComponents(n1.component, n2.component, intersection);
+                    }
                 }
                 if(y < height-1){
                     int j = i + width;
-                    mergeIfApprop(s1, s2, i, j, intersection, finalNodes);
+                    Node2D n2 = finalNodes.get(j);
+                    if(appropToMerge(n1, n2, s1, s2)){
+                        ArrayList<Node2D> nodes = (ArrayList<Node2D>) n2.component.nodes.clone();
+                        for(Node2D n: nodes){
+                            n.component = n1.component;
+                            n1.component.nodes.add(n);
+                        }
+                        intersection.remove(n2.component);
+                        //mergeComponents(n1.component, n2.component, intersection);
+                   }
                 }
                 if(x < width-1 && y < height-1){
                     int j = i+width+1;
-                    mergeIfApprop(s1, s2, i, j, intersection, finalNodes);
+                    Node2D n2 = finalNodes.get(j);
+                    if(appropToMerge(n1, n2, s1, s2)){
+                        ArrayList<Node2D> nodes = (ArrayList<Node2D>) n2.component.nodes.clone();
+                        for(Node2D n: nodes){
+                            n.component = n1.component;
+                            n1.component.nodes.add(n);
+                        }
+                        intersection.remove(n2.component);
+                        //mergeComponents(n1.component, n2.component, intersection);
+                    }
                 }
             }
         }
         return intersection;
     }
 
-    private void mergeIfApprop(ArrayList<Component2D> s1, ArrayList<Component2D> s2,
-                               int i, int j, ArrayList<Component2D> intersection,
-                               ArrayList<Node2D> finalNodes)
+    private boolean appropToMerge(Node2D n1, Node2D n2, ArrayList<Component2D> s1, ArrayList<Component2D> s2)
     {
-        boolean found = false;
-        for(Component2D c1 : s1){
-            for(Component2D c2 : s2){
-                if(c1.containsNodes(finalNodes.get(i), finalNodes.get(j)) &&
-                   c2.containsNodes(finalNodes.get(i), finalNodes.get(j))){
-                    found = true;
-                    mergeComponents(finalNodes.get(i).component,
-                                    finalNodes.get(j).component,
-                                    intersection);
-                }
-                if (found) break;
+        boolean inS1 = false;
+        boolean inS2 = false;
+
+        for(Component2D c : s1){
+            if(c.containsNodes(n1,n2)){
+                inS1 = true;
+                break;
             }
-            if(found) break;
         }
+        if(inS1){
+            for(Component2D c : s2){
+                if(c.containsNodes(n1,n2)){
+                    inS2 = true;
+                    break;
+                }
+            }
+        }
+        return inS1 && inS2;
     }
+
 
     //private Component2D mergeComponents(Component2D c1, Component2D c2, HashMap<Component2D, Component2D> s)
     private void mergeComponents(Component2D c1, Component2D c2, ArrayList<Component2D> s)
@@ -208,7 +251,7 @@ class Graph2D
 
 
     /** Find a non-decreasing ordering for the edges in a given set.**/
-    private ArrayList<Edge> nonDecreasingEdges(ArrayList<Edge> toSort)
+    public ArrayList<Edge> nonDecreasingEdges(ArrayList<Edge> toSort)
     {
         ArrayList<Edge> nonDecreasing = new ArrayList<Edge>();
 

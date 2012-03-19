@@ -18,8 +18,8 @@ class Node2D
 
     public boolean nodeEqual(Node2D n)
     {
-        boolean equal = (n.color == color);
-        equal = equal && (n.location[0] == location[0]);
+        //boolean equal = (n.color == color);
+        boolean equal = (n.location[0] == location[0]);
         equal = equal && (n.location[1] == location[1]);
         return equal;
     }

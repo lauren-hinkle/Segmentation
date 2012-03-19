@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
-import april.util.*;
 
 
 class Segment2D
@@ -33,7 +32,7 @@ class Segment2D
             }
         }
 
-        double k = 15;
+        double k = 300;
         gRed = new Graph2D(red, k);
         System.out.print("Red graph, ");
         gGreen = new Graph2D(green, k);
@@ -51,17 +50,87 @@ class Segment2D
         //HashMap<Component2D, Component2D> bSegment = gBlue.segment();
 
         ArrayList<Component2D> rSeg = gRed.segment();
-        System.out.print("Segmented red, ");
+        System.out.print("Segmented red, "+rSeg.size());
+        // Color each segment a random color
+        for(Component2D c : rSeg){
+            int rgb = randomRGB();
+            for(Node2D n : c.nodes){
+                int[] loc = n.location;
+                bi.setRGB(loc[0], loc[1], rgb);
+            }
+        }
+
+        try {
+            File outputfile = new File("segmented-r.png");
+            ImageIO.write(bi, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
         ArrayList<Component2D> gSeg = gGreen.segment();
         System.out.print("Segmented green, ");
+        // Color each segment a random color
+        for(Component2D c : gSeg){
+            int rgb = randomRGB();
+            for(Node2D n : c.nodes){
+                int[] loc = n.location;
+                bi.setRGB(loc[0], loc[1], rgb);
+            }
+        }
+
+        try {
+            File outputfile = new File("segmented-g.png");
+            ImageIO.write(bi, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
         ArrayList<Component2D> bSeg = gBlue.segment();
         System.out.print("Segmented blue \n");
+        // Color each segment a random color
+        for(Component2D c : bSeg){
+            int rgb = randomRGB();
+            for(Node2D n : c.nodes){
+                int[] loc = n.location;
+                bi.setRGB(loc[0], loc[1], rgb);
+            }
+        }
+
+        try {
+            File outputfile = new File("segmented-b.png");
+            ImageIO.write(bi, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 
         ArrayList<Component2D> rgSeg = gRed.intersectSegmentations(rSeg, gSeg);
         System.out.println("Combined red and green segmentations");
+        // Color each segment a random color
+        for(Component2D c : rgSeg){
+            int rgb = randomRGB();
+            for(Node2D n : c.nodes){
+                int[] loc = n.location;
+                bi.setRGB(loc[0], loc[1], rgb);
+            }
+        }
+
+        try {
+            File outputfile = new File("segmented-rg.png");
+            ImageIO.write(bi, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
         ArrayList<Component2D> rgbSeg = gRed.intersectSegmentations(rgSeg, bSeg);
         System.out.println("Combined red, green, and blue segmentations");
-
         // Color each segment a random color
         for(Component2D c : rgbSeg){
             int rgb = randomRGB();
@@ -72,7 +141,7 @@ class Segment2D
         }
 
         try {
-            File outputfile = new File("segmented.png");
+            File outputfile = new File("segmented-rgb.png");
             ImageIO.write(bi, "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
