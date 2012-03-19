@@ -14,19 +14,54 @@ class Component2D
         g = graph;
         this.k = k;
         nodes = new ArrayList<Node2D>();
+        edges = new ArrayList<Edge>();
     }
 
 
     public void addNode(Node2D n)
     {
+        for(Node2D n2 : nodes){
+            if(areNeighbors(n,n2))
+               edges.add(new Edge(n, n2));
+        }
         nodes.add(n);
+        if(nodes.size()-1 > edges.size())
+            System.out.println("SOMETHING IS VERY WRONG!!! "+nodes.size()+"   "+edges.size());
+    }
+
+    private boolean areNeighbors(Node2D n1, Node2D n2)
+    {
+        boolean neighbors = false;
+
+        int x1 = n1.location[0];
+        int x2 = n2.location[0];
+        int y1 = n1.location[1];
+        int y2 = n2.location[1];
+
+        int diffx = Math.abs(x1-x2);
+        int diffy = Math.abs(y1-y2);
+
+        if(diffx < 2 && diffy < 2)
+            neighbors = true;
+
+        return neighbors;
+    }
+
+    public void addEdge(Edge e)
+    {
+        edges.add(e);
+    }
+
+    public void addEdge(Node2D n1, Node2D n2)
+    {
+        edges.add(new Edge(n1, n2));
     }
 
     public boolean containsNode(int x, int y)
     {
         boolean contains = false;
 
-        for(Node2D n1 : nodes){
+        for(Node2D n : nodes){
             if(n.location[0] == x && n.location[1] == y){
                 contains = true;
                 break;
@@ -62,7 +97,7 @@ class Component2D
 
         if(c.containsNode(nodes.get(0)))
            disjoint = false;
-
+        //System.out.println(disjoint);
         return disjoint;
     }
 
@@ -70,8 +105,8 @@ class Component2D
     /** Internal difference function as defined by paper. **/
     public double internalDifference()
     {
-        ArrayList<Edge> minST = minSpanTree();
-
+        ArrayList<Edge> minST = minSpanTree(edges);
+        //System.out.println("#Nodes: "+nodes.size()+" #Edge: "+edges.size()+" in minST: "+minST.size()+"  "+maxWeight(minST));
         return maxWeight(minST);
     }
 
@@ -81,7 +116,9 @@ class Component2D
     {
         ArrayList<Edge> eBetween = edgesBetween(this, c);
 
-        if(eBetween.size() == 0) return 100000;
+        //System.out.println("Size eBetween: "+eBetween.size());
+
+        if(eBetween.size() == 0) return 1000000;
         else return minWeight(eBetween);
     }
 
@@ -94,10 +131,12 @@ class Component2D
 
         double intDiff1 = internalDifference() + threshold(this);
         double intDiff2 = c.internalDifference() + threshold(c);
+        //System.out.println("Internal Differences: "+intDiff1+", "+intDiff2);
 
-        if(differenceBetween(c) > minimum(intDiff1, intDiff2))
+        //System.out.println(nodes.size()+"\t"+differenceBetween(c)+"\t"+minimum(intDiff1,intDiff2));
+        if(differenceBetween(c) < minimum(intDiff1, intDiff2))
             predicate = true;
-
+        //System.out.println(predicate);
         return predicate;
     }
 
@@ -110,6 +149,7 @@ class Component2D
     }
 
 
+    /** Find the minimum between two doubles and return it. **/
     private double minimum(double a, double b)
     {
         double min = a;
@@ -119,30 +159,30 @@ class Component2D
 
 
     /** Find the minimum spanning tree using Kruskal's algorithm**/
-    public ArrayList<Edge> minSpanTree()
+    public ArrayList<Edge> minSpanTree(ArrayList<Edge> allEdges)
     {
         ArrayList<Edge> minST = new ArrayList<Edge>();
 
         ArrayList<Edge> unconsideredEdges = new ArrayList<Edge>();
-        for(Edge e : edges){
+        for(Edge e : allEdges){
             unconsideredEdges.add(e);
         }
 
+        //while(minST < nodes.size()){
         for(int i=0; i<nodes.size()-1; i++){
             boolean addedEdge = false;
 
-            while(!addedEdge){
+            while(!addedEdge && unconsideredEdges.size() > 0){
                 int location = g.minimumEdge(unconsideredEdges);
-                Edge minimum = unconsideredEdges.get(i);
+                Edge minimum = unconsideredEdges.get(location);
 
                 if(!closesCircuit(minimum, minST)){
                     minST.add(minimum);
                     addedEdge = true;
                 }
-                else unconsideredEdges.remove(location);
+                unconsideredEdges.remove(location);
             }
         }
-
         return minST;
     }
 
@@ -159,7 +199,6 @@ class Component2D
             if (edge.containsNode(e.node2))
                 n2Included = true;
         }
-
         return (n1Included && n2Included);
     }
 
@@ -167,6 +206,7 @@ class Component2D
     /** Find the largest weight in a lest of edges.**/
     private double maxWeight(ArrayList<Edge> allEdges)
     {
+        if(allEdges.size() == 0) return 0;
         double maxWeight = -1;
 
         for(int i=0; i<allEdges.size(); i++){
@@ -174,12 +214,11 @@ class Component2D
                 maxWeight = allEdges.get(i).weight;
             }
         }
-
         return maxWeight;
     }
 
 
-    /** Find the smallest weight in a lest of edges.**/
+    /** Find the smallest weight in a list of edges.**/
     private double minWeight(ArrayList<Edge> allEdges)
     {
         double minWeight = 10000;
@@ -189,7 +228,6 @@ class Component2D
                 minWeight = allEdges.get(i).weight;
             }
         }
-
         return minWeight;
     }
 
@@ -207,11 +245,9 @@ class Component2D
                     if (e.containsNode(n2)){
                         eBetween.add(e);
                     }
-
                 }
             }
         }
-
         return eBetween;
     }
 }
